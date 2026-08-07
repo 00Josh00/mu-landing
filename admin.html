@@ -6,95 +6,108 @@
     <title>Admin - MU Online</title>
     <style>
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-        :root{
-            --bg:#06060e;--surface:#0e0e1c;--border:#1a1a30;
-            --gold:#d4a843;--text:#c5c5d8;--dim:#6a6a8a;--green:#22c55e;--red:#ef4444;
-        }
-        body{
-            font-family:'Segoe UI',system-ui,sans-serif;
-            background:var(--bg);color:var(--text);
-            min-height:100vh;display:flex;align-items:center;justify-content:center;
-        }
+        :root{--bg:#06060e;--surface:#0e0e1c;--border:#1a1a30;--gold:#d4a843;--text:#c5c5d8;--dim:#6a6a8a;--green:#22c55e;--red:#ef4444}
+        body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center}
         .container{width:100%;max-width:400px;padding:24px}
-        .card{
-            background:var(--surface);border:1px solid var(--border);
-            border-radius:16px;padding:40px 32px;
-        }
-        .card h1{
-            font-size:1.5rem;color:var(--gold);text-align:center;margin-bottom:4px;
-        }
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 32px;margin-bottom:16px}
+        .card h1{font-size:1.5rem;color:var(--gold);text-align:center;margin-bottom:4px}
         .card .sub{color:var(--dim);text-align:center;font-size:.85rem;margin-bottom:28px}
         .form-group{margin-bottom:18px}
         .form-group label{display:block;color:var(--dim);font-size:.85rem;margin-bottom:6px}
-        .form-group input{
-            width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);
-            border-radius:8px;color:var(--text);font-size:.95rem;outline:none;
-            transition:border-color .2s;
-        }
+        .form-group input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.95rem;outline:none;transition:border-color .2s}
         .form-group input:focus{border-color:var(--gold)}
-        .btn{
-            width:100%;padding:12px;background:var(--gold);color:#0a0a12;
-            border:none;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer;
-            transition:opacity .2s;margin-top:8px;
-        }
+        .btn{width:100%;padding:12px;background:var(--gold);color:#0a0a12;border:none;border-radius:8px;font-weight:600;font-size:1rem;cursor:pointer;transition:opacity .2s;margin-top:8px}
         .btn:hover{opacity:.9}
+        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);margin-top:12px}
+        .btn-outline:hover{background:var(--surface)}
         .error{color:var(--red);font-size:.85rem;text-align:center;margin-top:12px;display:none}
+        .success{color:var(--green);font-size:.85rem;text-align:center;margin-top:12px;display:none}
         .back{display:block;text-align:center;color:var(--dim);font-size:.85rem;margin-top:20px;text-decoration:none}
         .back:hover{color:var(--text)}
+        #panel{display:none}
+        #loginForm{display:block}
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="card">
-            <h1>MU Online Admin</h1>
-            <p class="sub">Panel de administracion</p>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Correo</label>
-                    <input type="email" id="email" placeholder="admin@mu-server.local" required>
-                </div>
-                <div class="form-group">
-                    <label>Contrasena</label>
-                    <input type="password" id="password" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn">Iniciar Sesion</button>
-            </form>
-            <div class="error" id="error"></div>
+        <div id="loginForm">
+            <div class="card">
+                <h1>MU Online Admin</h1>
+                <p class="sub">Panel de administracion</p>
+                <form onsubmit="doLogin(event)">
+                    <div class="form-group"><label>Correo</label><input type="email" id="email" placeholder="admin@mu-server.local" required></div>
+                    <div class="form-group"><label>Contrasena</label><input type="password" id="password" placeholder="••••••••" required></div>
+                    <button type="submit" class="btn">Iniciar Sesion</button>
+                </form>
+                <div class="error" id="loginError"></div>
+            </div>
         </div>
-        <a href="/" class="back">← Volver al servidor</a>
+
+        <div id="panel">
+            <div class="card">
+                <h1>Bienvenido</h1>
+                <p class="sub" id="adminEmail"></p>
+                <button class="btn" onclick="goToPanel()">Ir al Panel de Administracion</button>
+                <div class="form-group" style="margin-top:24px"><label>Nueva Contrasena</label><input type="password" id="newPassword" placeholder="Minimo 6 caracteres"></div>
+                <div class="form-group"><label>Contrasena Actual</label><input type="password" id="currentPassword" placeholder="Contrasena actual"></div>
+                <button class="btn btn-outline" onclick="changePassword()">Cambiar Contrasena</button>
+                <button class="btn btn-outline" onclick="logout()">Cerrar Sesion</button>
+                <div class="success" id="changeOk"></div>
+                <div class="error" id="changeError"></div>
+            </div>
+        </div>
+        <a href="/" class="back">Volver al servidor</a>
     </div>
 
     <script>
         const API = 'https://venues-ipaq-configure-vendors.trycloudflare.com';
         const ADMIN = 'https://venues-ipaq-configure-vendors.trycloudflare.com';
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        function show(id){document.getElementById(id).style.display='block'}
+        function hide(id){document.getElementById(id).style.display='none'}
+        function err(id,msg){let e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
+        function ok(id,msg){let e=document.getElementById(id);e.textContent=msg;e.style.display='block'}
+
+        async function doLogin(e){
             e.preventDefault();
+            hide('loginError');
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const errorEl = document.getElementById('error');
-
-            errorEl.style.display = 'none';
-            try {
-                const res = await fetch(API + '/api/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email, password})
-                });
+            try{
+                const res = await fetch(API+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
                 const data = await res.json();
-                if (data.token) {
-                    localStorage.setItem('admin_token', data.token);
-                    localStorage.setItem('admin_email', data.email);
-                    window.location.href = ADMIN;
-                } else {
-                    errorEl.textContent = data.error || 'Error de autenticacion';
-                    errorEl.style.display = 'block';
-                }
-            } catch(err) {
-                errorEl.textContent = 'Error de conexion';
-                errorEl.style.display = 'block';
-            }
-        });
+                if(data.token){
+                    localStorage.setItem('admin_token',data.token);
+                    localStorage.setItem('admin_email',data.email);
+                    hide('loginForm');show('panel');
+                    document.getElementById('adminEmail').textContent = data.email;
+                }else{err('loginError',data.error||'Error de autenticacion')}
+            }catch(ex){err('loginError','Error de conexion')}
+        }
+
+        function goToPanel(){window.location.href=ADMIN}
+
+        async function changePassword(){
+            hide('changeError');hide('changeOk');
+            const token = localStorage.getItem('admin_token');
+            const current = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            if(!current||!newPassword){err('changeError','Completa todos los campos');return}
+            if(newPassword.length<6){err('changeError','Minimo 6 caracteres');return}
+            try{
+                const res = await fetch(API+'/api/change-password',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({current,newPassword})});
+                const data = await res.json();
+                if(data.ok){ok('changeOk',data.message);document.getElementById('currentPassword').value='';document.getElementById('newPassword').value=''}
+                else{err('changeError',data.error||'Error')}
+            }catch(ex){err('changeError','Error de conexion')}
+        }
+
+        function logout(){localStorage.clear();hide('panel');show('loginForm')}
+
+        if(localStorage.getItem('admin_token')){
+            hide('loginForm');show('panel');
+            document.getElementById('adminEmail').textContent = localStorage.getItem('admin_email');
+        }
     </script>
 </body>
 </html>

@@ -511,6 +511,7 @@
         <div>
             <a href="#rates">Rates</a>
             <a href="#info">Servidor</a>
+            <a href="#register">Registrarse</a>
             <a href="#download">Descargar</a>
         </div>
     </nav>
@@ -601,6 +602,23 @@
         </div>
     </section>
 
+    
+    <section class="section" id="register">
+        <div class="container">
+            <div class="section-header">
+                <h2>Crear Cuenta</h2>
+                <p class="lead">Solo necesitas usuario y contrasena</p>
+            </div>
+            <div style="max-width:420px;margin:0 auto">
+                <div class="fg" style="margin-bottom:12px"><label style="color:var(--text-dim);font-size:.82rem;display:block;margin-bottom:5px">Usuario</label><input type="text" id="regUser" placeholder="Entre 3 y 10 caracteres" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.93rem;outline:none"></div>
+                <div class="fg" style="margin-bottom:16px"><label style="color:var(--text-dim);font-size:.82rem;display:block;margin-bottom:5px">Contrasena</label><input type="password" id="regPass" placeholder="Minimo 4 caracteres" style="width:100%;padding:11px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.93rem;outline:none"></div>
+                <button onclick="doRegister()" style="width:100%;padding:11px;background:var(--gold);color:#0a0a12;border:none;border-radius:8px;font-weight:600;font-size:.93rem;cursor:pointer">Crear Cuenta</button>
+                <div class="msg error" id="regError" style="margin-top:10px;text-align:center;font-size:.82rem;color:var(--red);display:none"></div>
+                <div class="msg ok" id="regOk" style="margin-top:10px;text-align:center;font-size:.82rem;color:var(--green);display:none"></div>
+            </div>
+        </div>
+    </section>
+
     <section class="section" id="download">
         <div class="container">
             <div class="download-zone">
@@ -633,6 +651,25 @@
             els.forEach(function(el){el.classList.add('reveal');obs.observe(el)});
         })();
     </script>
+
+
+<script>
+async function doRegister(){
+    var u=document.getElementById('regUser').value.trim();
+    var p=document.getElementById('regPass').value;
+    var er=document.getElementById('regError'); er.style.display='none';
+    var ok=document.getElementById('regOk'); ok.style.display='none';
+    if(!u||!p){er.textContent='Completa todos los campos';er.style.display='block';return}
+    if(u.length<3||u.length>10){er.textContent='Usuario entre 3 y 10 caracteres';er.style.display='block';return}
+    if(p.length<4){er.textContent='Password minimo 4 caracteres';er.style.display='block';return}
+    try{
+        var r=await fetch('https://toolkit-aware-bali-charms.trycloudflare.com/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+        var d=await r.json();
+        if(d.ok){ok.textContent=d.message;ok.style.display='block';document.getElementById('regUser').value='';document.getElementById('regPass').value=''}
+        else{er.textContent=d.error||'Error';er.style.display='block'}
+    }catch(ex){er.textContent='Error de conexion';er.style.display='block'}
+}
+</script>
 
 </body>
 </html>

@@ -663,7 +663,7 @@ async function doRegister(){
     if(u.length<3||u.length>10){er.textContent='Usuario entre 3 y 10 caracteres';er.style.display='block';return}
     if(p.length<4){er.textContent='Password minimo 4 caracteres';er.style.display='block';return}
     try{
-        var r=await fetch('https://toolkit-aware-bali-charms.trycloudflare.com/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+        var r=await fetch('https://absorption-pray-modified-marshall.trycloudflare.com/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
         var d=await r.json();
         if(d.ok){ok.textContent=d.message;ok.style.display='block';document.getElementById('regUser').value='';document.getElementById('regPass').value=''}
         else{er.textContent=d.error||'Error';er.style.display='block'}
